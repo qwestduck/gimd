@@ -15,13 +15,13 @@
 import sbt._
 import de.element34.sbteclipsify.Eclipsify
 
-class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaPlugin with Eclipsify
+class GimdProject(info: ProjectInfo) extends DefaultProject(info) with IdeaProject with Eclipsify
   with PerformanceTests {
   val jgitRepo = "jgit-repository" at "http://download.eclipse.org/jgit/maven"
   val jgit = "org.eclipse.jgit" % "org.eclipse.jgit" % "0.7.1" withSources()
 
-  val scalaTools = "scala-tools-snapshots" at "http://scala-tools.org/repo-snapshots"
-  val scalaCheck = "org.scala-tools.testing" % "scalacheck_2.8.0.RC4" % "1.8-SNAPSHOT" % "test"
+  val scalaTools = "scala-tools-snapshots" at "http://mvnrepository.com/artifact"
+  val scalaCheck = "org.scala-tools.testing" % "scalacheck_2.8.0" % "1.7" % "test"
 
   val bryanjswift = "Bryan J Swift Repository" at "http://repos.bryanjswift.com/maven2/"
   val junitInterface = "com.novocode" % "junit-interface" % "0.4.0" % "test"
