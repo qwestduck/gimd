@@ -62,7 +62,7 @@ class Message(private val fields: SortedSet[Field])
    * Filters fields of returned by method all so the returned list contains fields of only one given
    * type. 
    */
-  def allOfVariant[T](name: String)(implicit m: ClassManifest[T]) = (m.toString match {
+  def allOfVariant[T <: Field](name: String)(implicit m: ClassManifest[T]) = (m.toString match {
     case "com.google.gimd.IntField" => all(name).flatMap {
       x => if (x.isInstanceOf[IntField]) Some(x.asInstanceOf[IntField]) else None
     } toList
