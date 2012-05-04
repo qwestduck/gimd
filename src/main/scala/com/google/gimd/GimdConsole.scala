@@ -23,9 +23,15 @@ import lucene.LuceneOptimizedDatabase
 object GimdConsole {
 
   import query.Query._
+  
+  private var db: JGitDatabase = null
 
-  def openDb(path: String, fileTypes: List[FileType[_]]): Database =
-    new JGitDatabase(fileTypes, JGitUtils.createRepository(path)) with LuceneOptimizedDatabase
+  def openDb(path: String, fileTypes: List[FileType[_]]): Database = {
+    this.db = new JGitDatabase(fileTypes, JGitUtils.createRepository(path)) with LuceneOptimizedDatabase
+    this.db
+  }
+
+  def closeDb() = this.db.close
 
   def measureTime(n: Int, action: () => Unit): (Double, Double) = {
     import java.util.Date
