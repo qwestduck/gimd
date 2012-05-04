@@ -17,6 +17,7 @@ package com.google.gimd;
 import com.google.gimd.text.Formatter
 import scala.collection.immutable.TreeSet
 import scala.collection.immutable.SortedSet
+import scala.reflect.Manifest
 
 object Message {
   val empty: Message = new Message(TreeSet.empty(Ordering.ordered[Field]))
@@ -61,9 +62,41 @@ class Message(private val fields: SortedSet[Field])
    * Filters fields of returned by method all so the returned list contains fields of only one given
    * type. 
    */
-  def allOfVariant[T <: Field](name: String): List[T] = all(name).flatMap {
-    x => if (x.isInstanceOf[T]) Some(x.asInstanceOf[T]) else None
-  } toList
+  def allOfVariant[T](name: String)(implicit m: ClassManifest[T]) = (m.toString match {
+    case "com.google.gimd.IntField" => all(name).flatMap {
+      x => if (x.isInstanceOf[IntField]) Some(x.asInstanceOf[IntField]) else None
+    } toList
+
+    case "com.google.gimd.LongField" => all(name).flatMap {
+      x => if (x.isInstanceOf[LongField]) Some(x.asInstanceOf[LongField]) else None
+    } toList
+
+    case "com.google.gimd.BigIntField" => all(name).flatMap {
+      x => if (x.isInstanceOf[BigIntField]) Some(x.asInstanceOf[BigIntField]) else None
+    } toList
+
+    case "com.google.gimd.BigDecimalField" =>  all(name).flatMap {
+      x => if (x.isInstanceOf[BigDecimalField]) Some(x.asInstanceOf[BigDecimalField]) else None
+    } toList
+
+    case "com.google.gimd.TimestampField" => all(name).flatMap {
+      x => if (x.isInstanceOf[TimestampField]) Some(x.asInstanceOf[TimestampField]) else None
+    } toList
+
+    case "com.google.gimd.StringField" =>   all(name).flatMap {
+      x => if (x.isInstanceOf[StringField]) Some(x.asInstanceOf[StringField]) else None
+    } toList
+
+    case "com.google.gimd.MessageField" =>   all(name).flatMap {
+      x => if (x.isInstanceOf[MessageField]) Some(x.asInstanceOf[MessageField]) else None
+    } toList
+
+    case "com.google.gimd.Field" => all(name).flatMap {
+       x => if (x.isInstanceOf[Field]) Some(x.asInstanceOf[Field]) else None
+    } toList
+
+    case unknownType => throw new Exception("Unsupported Field type " + unknownType)
+  }).asInstanceOf[List[T]]
 
   /**
    * @throws Predef.NoSuchElementException if there is more than one field with given name
