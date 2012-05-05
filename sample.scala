@@ -20,29 +20,39 @@ object MyUserFileType extends com.google.gimd.file.FileType[User] {
   def name(m: Message) = userType.name(m)
 }
 
-val db: Database = GimdConsole.openDb("sample-repo", MyUserFileType :: Nil)
+object ReturnCode {
+  val STATUS_OK:Int = 1
+}
 
-db.modifyAndReturn[String]( (s: Snapshot) => {
-  val users = s.query(MyUserFileType, MyUserType.query)
+object Sample { 
+  def main(args: Array[String]):Int = {
+    val db: Database = GimdConsole.openDb("sample-repo", MyUserFileType :: Nil)
 
-  if (users.isEmpty) {
-    val newUsers = for (i <- 1 to 1000) yield User("user"+i, "email"+i+"@google.com", i%91)
-    val mod: modification.DatabaseModification = newUsers.foldLeft(modification.DatabaseModification.empty)( (m, user) => m.insertFile(MyUserFileType, user))
-    val commitMessage: String = "Add new users"
+    /* Fixme: Not thread-safe
+      GimdConsole.db.modifyAndReturn[String]( (s: Snapshot) => {
+      val users = s.query(MyUserFileType, MyUserType.query)
+
+      if (users.isEmpty) {
+        val newUsers = for (i <- 1 to 1000) yield User("user"+i, "email"+i+"@google.com", i%91)
+        val mod: modification.DatabaseModification = newUsers.foldLeft(modification.DatabaseModification.empty)( (m, user) => m.insertFile(MyUserFileType, user))
+        val commitMessage: String = "Add new users"
     
-    (mod, commitMessage)
+        (mod, commitMessage)
+      }
+      else {
+        val mod: modification.DatabaseModification = modification.DatabaseModification.empty
+        val commitMessage: String = "No action performed"
+
+        (mod, commitMessage)
+      }
+    })*/
+
+    println("-- Querying for users with age less than 3")
+    db.query(MyUserFileType, MyUserType.query where { _.age < 3 }) foreach println
+    println("-- Querying for user with name 'user78'")
+    db.query(MyUserFileType, MyUserType.query where { _.name === "user78" }) foreach println
+
+    GimdConsole.closeDb()
+    ReturnCode.STATUS_OK
   }
-  else {
-    val mod: modification.DatabaseModification = modification.DatabaseModification.empty
-    val commitMessage: String = "No action performed"
-
-    (mod, commitMessage)
-  }
-})
-
-println("-- Querying for users with age less than 3")
-db.query(MyUserFileType, MyUserType.query where { _.age < 3 }) foreach println
-println("-- Querying for user with name 'user78'")
-db.query(MyUserFileType, MyUserType.query where { _.name === "user78" }) foreach println
-
-GimdConsole.closeDb()
+}
